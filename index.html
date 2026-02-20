@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Digital Twin Demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root {
+            --dark-bg: #0b0e11;
+            --card-bg: #1e2125;
+            --accent-red: #ff4d4d;
+            --accent-blue: #00d2ff;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            overflow: hidden; /* Prevent body scroll for app feel */
+        }
+
+        /* --- Login Screen --- */
+        #auth-screen {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0b0e11 0%, #1a1d21 100%);
+        }
+
+        /* --- Map View (Home) --- */
+        #home-screen { display: none; height: 100vh; position: relative; }
+        
+        #map-container {
+            width: 100%;
+            height: 100%;
+            background: #242424; /* Placeholder for 3D Engine */
+            position: absolute;
+            z-index: 1;
+        }
+
+        /* Overlay Alerts (Top Left) */
+        .map-overlay-alerts {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            max-width: 250px;
+        }
+
+        .mini-alert-card {
+            background: rgba(30, 33, 37, 0.85);
+            backdrop-filter: blur(10px);
+            border-left: 4px solid var(--accent-red);
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        /* --- Content Screens (Feed, Profile, etc) --- */
+        .content-screen {
+            display: none;
+            height: calc(100vh - 70px);
+            overflow-y: auto;
+            padding-top: 70px; /* Space for top nav */
+        }
+
+        .top-nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            background: rgba(11, 14, 17, 0.7);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        /* --- Navigation --- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            height: 70px;
+            background: #16181b;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid #2d3136;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            color: #8a8d91;
+            text-align: center;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .nav-item.active { color: var(--accent-blue); }
+        .nav-item i { display: block; margin-bottom: 2px; }
+        .nav-item span { font-size: 0.7rem; }
+
+        /* --- Cards --- */
+        .feed-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            margin: 15px;
+            overflow: hidden;
+            border: 1px solid #2d3136;
+        }
+
+        .feed-img { width: 100%; height: 200px; object-fit: cover; background: #333; }
+        
+        /* Profile Image */
+        .profile-header { text-align: center; padding: 20px; }
+        .profile-img { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--accent-blue); }
+    </style>
+</head>
+<body>
+
+    <div id="auth-screen">
+        <div class="card bg-dark text-white p-4" style="width: 350px;">
+            <h3 class="text-center mb-4">Digital Twin Login</h3>
+            <input type="text" class="form-control mb-3 bg-secondary text-white border-0" placeholder="Username">
+            <input type="password" class="form-control mb-3 bg-secondary text-white border-0" placeholder="Password">
+            <button class="btn btn-primary w-100 mb-2" onclick="login()">Login</button>
+            <button class="btn btn-outline-light w-100 mb-3" onclick="login()">
+                <i class="material-icons align-middle">fingerprint</i> Biometric
+            </button>
+            <p class="text-center small">New user? <a href="#" class="text-info">Sign up</a></p>
+        </div>
+    </div>
+
+    <div id="app-content" style="display: none;">
+        
+        <nav class="top-nav" id="top-nav">
+            <div id="nav-brand" class="fw-bold">CommunityApp</div>
+            <div>
+                <i class="material-icons me-3">notifications</i>
+                <i class="material-icons">settings</i>
+            </div>
+        </nav>
+
+        <section id="home-screen" class="screen">
+            <div class="map-overlay-alerts">
+                <div class="mini-alert-card">
+                    <strong>Water Outage</strong><br>
+                    <span class="small">Main St - 300m radius</span>
+                </div>
+                <div class="mini-alert-card" style="border-left-color: #00d2ff;">
+                    <strong>Food Festival</strong><br>
+                    <span class="small">Town Square - 2pm</span>
+                </div>
+            </div>
+            <div id="map-container">
+                <div class="d-flex align-items-center justify-content-center h-100 text-secondary">
+                    <div class="text-center">
+                        <i class="material-icons style="font-size: 50px;">public</i>
+                        <p>3D Digital Twin Engine Loading...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="feed-screen" class="content-screen screen">
+            <div class="feed-card" onclick="showEventDetail('Road Closure', 'Active hazard in your radius')">
+                <img src="https://images.unsplash.com/photo-1544928147-79a2dbc1f389?auto=format&fit=crop&w=400&q=80" class="feed-img">
+                <div class="p-3">
+                    <div class="d-flex justify-content-between">
+                        <span class="badge bg-danger mb-2">Hazard</span>
+                        <small class="text-muted">2 mins ago</small>
+                    </div>
+                    <h5>Road Maintenance</h5>
+                    <p class="small text-muted mb-0">Posted by: Admin @ Sector 4</p>
+                </div>
+            </div>
+            <div class="feed-card" onclick="showEventDetail('Summer Fest', 'Local community gathering')">
+                <div class="p-3">
+                    <span class="badge bg-info mb-2 text-dark">Social Event</span>
+                    <h5>Summer Music Fest</h5>
+                    <p class="small text-muted">Join us at the Central Park 3D Node.</p>
+                    <button class="btn btn-sm btn-outline-info">Interested</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="profile-screen" class="content-screen screen">
+            <div class="profile-header">
+                <img src="https://ui-avatars.com/api/?name=User&background=00d2ff&color=fff" class="profile-img mb-3">
+                <h4>John Doe</h4>
+                <p class="text-muted small">House 402, Sector B</p>
+            </div>
+            <div class="px-3">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item bg-transparent text-white border-secondary">
+                        <small class="text-muted">Phone</small><br>+27 82 123 4567
+                    </li>
+                    <li class="list-group-item bg-transparent text-white border-secondary">
+                        <small class="text-muted">Recent Activity</small><br>Attended: Neighborhood Watch Meet
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <nav class="bottom-nav">
+            <div class="nav-item active" onclick="switchTab('home', this)">
+                <i class="material-icons">map</i><span>Home</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('feed', this)">
+                <i class="material-icons">dynamic_feed</i><span>Feed</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('alerts', this)">
+                <i class="material-icons">warning</i><span>Alerts</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('events', this)">
+                <i class="material-icons">event</i><span>Events</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('profile', this)">
+                <i class="material-icons">person</i><span>Profile</span>
+            </div>
+        </nav>
+    </div>
+
+    <div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark text-white border-secondary">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="modalTitle">Event Title</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="modalBody">Description goes here.</p>
+                    <button class="btn btn-primary w-100 mb-2" onclick="purchaseTicket()">Purchase Ticket</button>
+                    <button class="btn btn-outline-light w-100" onclick="goToMap()">View on Map</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // --- 1. Authentication Logic ---
+        function login() {
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('app-content').style.display = 'block';
+            requestLocation();
+        }
+
+        function requestLocation() {
+            // Simulator for "App requests precise user device location"
+            console.log("Requesting GPS Access...");
+            // Lock map on user radius simulation
+        }
+
+        // --- 2. Navigation Logic ---
+        function switchTab(tabId, element) {
+            // Update Active Class in Nav
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            element.classList.add('active');
+
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(screen => screen.style.display = 'none');
+            
+            // Show selected screen
+            const target = document.getElementById(tabId + '-screen');
+            if(target) target.style.display = 'block';
+
+            // Top Nav Visibility Logic
+            const topNav = document.getElementById('top-nav');
+            const brand = document.getElementById('nav-brand');
+
+            if (tabId === 'home') {
+                topNav.style.display = 'none'; // Map is full screen with overlays
+            } else {
+                topNav.style.display = 'flex';
+                // Profile tab specific: Hide app name
+                brand.style.visibility = (tabId === 'profile') ? 'hidden' : 'visible';
+            }
+        }
+
+        // --- 3. Interaction Logic ---
+        const eventModal = new bootstrap.Modal(document.getElementById('eventModal'));
+
+        function showEventDetail(title, desc) {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalBody').innerText = desc;
+            eventModal.hide(); // Reset
+            eventModal.show();
+        }
+
+        function goToMap() {
+            eventModal.hide();
+            switchTab('home', document.querySelector('.nav-item:first-child'));
+            alert("Map pinned to event location.");
+        }
+
+        function purchaseTicket() {
+            alert("Redirecting to secure payment...");
+        }
+
+        // Initialize first view
+        window.onload = () => {
+            // App starts at login
+        };
+    </script>
+</body>
+</html>
