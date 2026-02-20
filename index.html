@@ -88,7 +88,7 @@
             position: fixed;
             bottom: 0;
             width: 100%;
-            height: 70px;
+            height: 55px;
             background: #16181b;
             display: flex;
             justify-content: space-around;
@@ -128,7 +128,7 @@
 
     <div id="auth-screen">
         <div class="card bg-dark text-white p-4" style="width: 350px;">
-            <h3 class="text-center mb-4">Digital Twin Login</h3>
+            <h3 class="text-center mb-4">D Twin Login</h3>
             <input type="text" class="form-control mb-3 bg-secondary text-white border-0" placeholder="Username">
             <input type="password" class="form-control mb-3 bg-secondary text-white border-0" placeholder="Password">
             <button class="btn btn-primary w-100 mb-2" onclick="login()">Login</button>
@@ -164,7 +164,7 @@
                 <div class="d-flex align-items-center justify-content-center h-100 text-secondary">
                     <div class="text-center">
                         <i class="material-icons style="font-size: 50px;">public</i>
-                        <p>3D Digital Twin Engine Loading...</p>
+                        <p>3D Map Loading...</p>
                     </div>
                 </div>
             </div>
@@ -212,19 +212,19 @@
 
         <nav class="bottom-nav">
             <div class="nav-item active" onclick="switchTab('home', this)">
-                <i class="material-icons">map</i><span>Home</span>
+                <i class="material-icons">map</i>
             </div>
             <div class="nav-item" onclick="switchTab('feed', this)">
-                <i class="material-icons">dynamic_feed</i><span>Feed</span>
+                <i class="material-icons">dynamic_feed</i>
             </div>
             <div class="nav-item" onclick="switchTab('alerts', this)">
-                <i class="material-icons">warning</i><span>Alerts</span>
+                <i class="material-icons">warning</i>
             </div>
             <div class="nav-item" onclick="switchTab('events', this)">
-                <i class="material-icons">event</i><span>Events</span>
+                <i class="material-icons">event</i>
             </div>
             <div class="nav-item" onclick="switchTab('profile', this)">
-                <i class="material-icons">person</i><span>Profile</span>
+                <i class="material-icons">person</i>
             </div>
         </nav>
     </div>
