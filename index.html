@@ -211,7 +211,7 @@
         </section>
 
         <nav class="bottom-nav">
-            <div class="nav-item active" onclick="switchTab('home', this)">
+            <div class="nav-item nav-home active" onclick="switchTab('home', this)">
                 <i class="material-icons">map</i>
             </div>
             <div class="nav-item" onclick="switchTab('feed', this)">
@@ -253,6 +253,7 @@
             document.getElementById('auth-screen').style.display = 'none';
             document.getElementById('app-content').style.display = 'block';
             requestLocation();
+            switchTab("home", document.querySelector(".nav-home"));
         }
 
         function requestLocation() {
